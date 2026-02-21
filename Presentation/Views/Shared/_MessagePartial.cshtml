@@ -1,0 +1,47 @@
+﻿@{
+    var success = TempData["success"] as string;
+    var error = TempData["error"] as string;
+}
+
+@if (!string.IsNullOrEmpty(success) || !string.IsNullOrEmpty(error))
+{
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+                <div class="modal-header">
+<h5 class="modal-title">
+                        @(success != null ? "Success" : "Error")
+</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(success))
+                    {
+<div class="alert alert-success mb-0">
+                            @success
+</div>
+                    }
+                    @if (!string.IsNullOrEmpty(error))
+                    {
+<div class="alert alert-danger mb-0">
+                            @error
+</div>
+                    }
+</div>
+                <div class="modal-footer">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+</button>
+</div>
+            </div>
+</div>
+</div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            modal.show();
+        });
+</script>
+}
+
+ 

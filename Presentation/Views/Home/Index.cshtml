@@ -1,8 +1,218 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using Microsoft.AspNetCore.Identity
+@{
+    ViewData["Title"] = "Catalog (Single Page)";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .layout {
+        display: flex;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .panel {
+        padding: 12px;
+        border: 4px solid;
+        min-height: 80vh;
+        box-sizing: border-box;
+        background: #fff;
+    }
+
+    .left {
+        width: 22%;
+        border-color: #1e90ff; /* blue */
+    }
+
+    .middle {
+        width: 56%;
+        border-color: #22c55e; /* green */
+    }
+
+    .right {
+        width: 22%;
+        border-color: #f59e0b; /* orange */
+    }
+
+    .section {
+        border: 3px dashed #999;
+        padding: 10px;
+        margin-bottom: 12px;
+    }
+
+    .title {
+        font-weight: 800;
+        margin: 0 0 8px 0;
+        padding: 6px 8px;
+        border: 3px solid #111;
+        display: inline-block;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border: 2px solid #111;
+        font-weight: 700;
+        margin-left: 6px;
+    }
+
+    .pending { background: #fde68a; }  /* yellow-ish */
+    .active  { background: #bbf7d0; }  /* green-ish */
+    .blocked { background: #fecaca; }  /* red-ish */
+
+    input[type="text"], textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 6px;
+        border: 2px solid #111;
+    }
+
+    button {
+        padding: 8px 12px;
+        border: 3px solid #111;
+        font-weight: 700;
+        cursor: pointer;
+        background: #e5e7eb;
+    }
+
+    .small {
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+    hr { border: none; border-top: 2px solid #111; margin: 12px 0; }
+</style>
+
+<div class="layout">
+
+    <!-- LEFT: Auth -->
+    <div class="panel left">
+        <div class="title">AUTH</div>
+
+        @if (User?.Identity?.IsAuthenticated ?? false)
+        {
+            <p><b>Logged in as:</b> @User.Identity!.Name</p>
+            <p class="small">
+                (For now, logout is through the Identity UI page.)
+            </p>
+            <p>
+                <a href="/Identity/Account/Manage">Manage Account</a>
+            </p>
+            <p>
+                <a href="/Identity/Account/Logout">Logout</a>
+            </p>
+        }
+        else
+        {
+            <p><span class="badge blocked">NOT LOGGED IN</span></p>
+            <p>
+                <a href="/Identity/Account/Login">Login</a>
+                <br />
+                <a href="/Identity/Account/Register">Register</a>
+            </p>
+        }
+
+        <hr />
+
+        <div class="section">
+            <b>Roles (later)</b>
+            <p class="small">
+                • Admin approves Restaurants<br />
+                • Owner approves MenuItems
+            </p>
+        </div>
+    </div>
+
+    <!-- MIDDLE: Flow -->
+    <div class="panel middle">
+        <div class="title">MAIN FLOW</div>
+
+        <!-- Step 1: Bulk Import -->
+        <div class="section">
+            <b>Step 1 — Bulk Import JSON</b>
+            <p class="small">
+                Upload a JSON file OR paste JSON text. (Preview only; do NOT save to DB yet.)
+            </p>
+
+            <!-- Placeholder form: we’ll wire action/controller later -->
+            <form method="post" enctype="multipart/form-data" action="/BulkImport/BulkImport">
+                <p><b>Upload JSON file:</b></p>
+                <input type="file" name="jsonFile" />
+
+                <p><b>Or paste JSON:</b></p>
+                <textarea name="jsonText" rows="8" placeholder="[{ &quot;Type&quot;: &quot;Restaurant&quot;, ... }]"></textarea>
+
+                <p style="margin-top:10px;">
+                    <button type="submit">Preview Import</button>
+                </p>
+            </form>
+        </div>
+
+        <!-- Step 2: Preview -->
+        <div class="section">
+            <b>Step 2 — Preview Imported Items</b>
+            <p class="small">
+                This area will show cards based on <code>GetCardPartial()</code>.
+            </p>
+
+            <div style="border:3px solid #111; padding:10px;">
+                <p><span class="badge pending">PENDING</span> Preview list will appear here.</p>
+            </div>
+        </div>
+
+        <!-- Step 3: Commit -->
+        <div class="section">
+            <b>Step 3 — Commit (AA4.3)</b>
+            <p class="small">
+                This will move items from in-memory → DB and clear in-memory.
+            </p>
+
+            <!-- Placeholder commit button -->
+            <form method="post" action="/BulkImport/Commit">
+                <button type="submit">Commit to Database</button>
+            </form>
+        </div>
+
+        <!-- Step 4: Catalog -->
+        <div class="section">
+            <b>Step 4 — Catalog Display</b>
+            <p class="small">
+                This will list Restaurants and MenuItems from DB.
+            </p>
+
+            <div style="border:3px solid #111; padding:10px;">
+                <p><span class="badge active">ACTIVE</span> DB items list will appear here.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Status -->
+    <div class="panel right">
+        <div class="title">STATUS</div>
+
+        <div class="section">
+            <b>Import Status</b>
+            <p class="small">
+                In-memory items: <b>(not wired)</b><br />
+                Last import: <b>(not wired)</b>
+            </p>
+        </div>
+
+        <div class="section">
+            <b>Database Status</b>
+            <p class="small">
+                Restaurants: <b>(not wired)</b><br />
+                MenuItems: <b>(not wired)</b>
+            </p>
+        </div>
+
+        <div class="section">
+            <b>Legend</b>
+            <p>
+                <span class="badge pending">PENDING</span>
+                <span class="badge active">ACTIVE</span>
+                <span class="badge blocked">BLOCKED</span>
+            </p>
+        </div>
+    </div>
+
 </div>

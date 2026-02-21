@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Common.Interfaces
+namespace DataAccess.Repository
 {
-    public interface IItemValidating
+    internal class ItemsDbRepository
     {
-        List<string> GetValidators();
-        string GetCardPartial();
     }
 }
