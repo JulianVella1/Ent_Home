@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Common.Models
 {
-    internal class Restaurant : IItemValidating
+    public class Restaurant : IItemValidating
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }

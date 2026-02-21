@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace Common.Models
 {
-    internal class MenuItem : IItemValidating
+    public class MenuItem : IItemValidating
     {
         [Key]
         public Guid Id { get; set; }
         [Required, MaxLength(150)]
         public string Title { get; set; } = string.Empty;
-        public double Price { get; set; }
-        [Required, MaxLength(30)]
+        public decimal Price { get; set; }
+        
         [ForeignKey("Restaurant")]
         public int RestId {get; set; }
         public virtual Restaurant? Restaurant { get; set; }
