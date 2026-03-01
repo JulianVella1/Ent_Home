@@ -1,0 +1,9 @@
+﻿
+@model Common.Models.MenuItem
+
+<div class="card p-3">
+    <h5 class="mb-1">@Model.Title</h5>
+    <div>Price: €@Model.Price</div>
+    <div>RestaurantId: @Model.RestId</div>
+    <div>Status: @(Model.Status ? "Approved" : "Pending")</div>
+</div>

@@ -1,4 +1,6 @@
 using DataAccess.Context;
+using DataAccess.Factory;
+using DataAccess.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Presentation.Data;
@@ -23,8 +25,11 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-//here is where the service is created and injected wherever its requested
-//builder.Services.AddScoped(typeof(IProductsRepository)); -> to amend when added repos
+builder.Services.AddMemoryCache();
+builder.Services.AddKeyedScoped<IItemsRepository, ItemsInMemoryRepository>("cache");
+builder.Services.AddKeyedScoped<IItemsRepository, ItemsDbRepository>("db");
+
+builder.Services.AddScoped<ImportItemFactory>();
 
 
 var app = builder.Build();
@@ -51,7 +56,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=BulkImport}/{action=Index}/{id?}");
 app.MapRazorPages();
 
 app.Run();

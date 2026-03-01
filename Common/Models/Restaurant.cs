@@ -19,7 +19,7 @@ namespace Common.Models
         public string OwnerEmail { get; set; } = string.Empty;
         public bool Status { get; set; } = false;
         public string? ImagePath { get; set; }
-        public virtual ICollection<MenuItem> MenuItems { get; set; }
+        public virtual ICollection<MenuItem>? MenuItems { get; set; }
         public string GetCardPartial()
         {
             return "_RestaurantCard";
@@ -27,7 +27,10 @@ namespace Common.Models
 
         public List<string> GetValidators()
         {
-            throw new NotImplementedException();
+            List<string> validators = new List<string>();
+            //to ask if hard coded or not - sir confimed to hard code this
+            validators.Add("julian_vella@hotmail.com");
+            return validators;
         }
     }
 }

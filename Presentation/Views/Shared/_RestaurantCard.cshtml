@@ -1,0 +1,8 @@
+﻿
+@model Common.Models.Restaurant
+
+<div class="card p-3">
+    <h5 class="mb-1">@Model.Name</h5>
+    <div>Owner: @Model.OwnerEmail</div>
+    <div>Status: @(Model.Status ? "Approved" : "Pending")</div>
+</div>
