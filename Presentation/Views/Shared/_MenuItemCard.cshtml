@@ -1,9 +1,17 @@
-﻿
-@model Common.Models.MenuItem
+﻿@model Common.Models.MenuItem
 
-<div class="card p-3">
-    <h5 class="mb-1">@Model.Title</h5>
-    <div>Price: €@Model.Price</div>
-    <div>RestaurantId: @Model.RestId</div>
-    <div>Status: @(Model.Status ? "Approved" : "Pending")</div>
+<div class="d-flex align-items-center justify-content-between border rounded p-3 mb-2 bg-white">
+    <div class="d-flex align-items-center gap-3">
+        @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+        {
+            <img src="@Model.ImagePath" style="width:80px; height:80px; object-fit:cover;" class="rounded" />
+        }
+
+        <div>
+            <h6 class="mb-1">@Model.Title</h6>
+            <div class="text-muted">Price: €@Model.Price</div>
+            <div class="text-muted">Restaurant Id: @Model.RestId</div>
+            <div class="small">Status: @(Model.Status ? "Approved" : "Pending")</div>
+        </div>
+    </div>
 </div>

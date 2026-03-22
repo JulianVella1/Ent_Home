@@ -18,7 +18,9 @@ namespace Common.Models
         [Required, EmailAddress]
         public string OwnerEmail { get; set; } = string.Empty;
         public bool Status { get; set; } = false;
+
         public string? ImagePath { get; set; }
+        public string ExternalId { get; set; } = "";
         public virtual ICollection<MenuItem>? MenuItems { get; set; }
         public string GetCardPartial()
         {

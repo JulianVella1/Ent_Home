@@ -12,6 +12,10 @@ namespace DataAccess.Repository
         List<IItemValidating> Get();
         void Save(List<IItemValidating> items);
         void Approve(IEnumerable<string> itemIds);
-        void Remove(IItemValidating item);
+        List<IItemValidating> GetPendingRestaurants();
+        List<IItemValidating> GetApprovedRestaurants();
+        List<IItemValidating> GetApprovedMenuItemsByRestaurant(int restId);
+        List<IItemValidating> GetRestaurantsByOwner(string email);
+        List<IItemValidating> GetPendingMenuItemsForOwnerByRestaurant(string email, int restId);
     }
 }

@@ -19,6 +19,9 @@ namespace Common.Models
         
         [ForeignKey("Restaurant")]
         public int RestId {get; set; }
+        public string ExternalId { get; set; } = ""; //changes due to not seeing the json on appendix A, was working with mine
+        public string RestaurantExternalId { get; set; } = "";
+
         public virtual Restaurant? Restaurant { get; set; }
         public bool Status { get; set; } = false;
         public string? ImagePath { get; set; }

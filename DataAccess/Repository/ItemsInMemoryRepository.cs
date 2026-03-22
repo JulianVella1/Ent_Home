@@ -59,11 +59,41 @@ namespace DataAccess.Repository
             Save(items);
         }
 
-        public void Remove(IItemValidating item)//used to clear only the approved items
+
+        public List<IItemValidating> GetPendingRestaurants()
         {
-            var items = Get();
-            items.Remove(item);
-            Save(items);
+            throw new NotImplementedException();
+        }
+
+        public List<IItemValidating> GetApprovedRestaurants()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<IItemValidating> GetApprovedMenuItemsByRestaurant(int restId)
+        {
+            throw new NotImplementedException();
+
+        }
+        public List<IItemValidating> GetRestaurantsByOwner(string email)
+        {
+            return Get()
+                .OfType<Restaurant>()
+                .Where(r => r.OwnerEmail == email)
+                .Cast<IItemValidating>()
+                .ToList();
+        }
+
+        public List<IItemValidating> GetPendingMenuItemsForOwnerByRestaurant(string email, int restId)
+        {
+            return Get()
+                .OfType<MenuItem>()
+                .Where(m => !m.Status
+                            && m.RestId == restId
+                            && m.Restaurant != null
+                            && m.Restaurant.OwnerEmail == email)
+                .Cast<IItemValidating>()
+                .ToList();
         }
     }
 }

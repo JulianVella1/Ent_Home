@@ -3,7 +3,8 @@ using DataAccess.Factory;
 using DataAccess.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Presentation.Data;
+using Presentation.ActionFilters;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,9 +14,10 @@ builder.Services.AddDbContext<RestaurantDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<RestaurantDbContext>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 // Add session configuration
 builder.Services.AddSession(options =>
@@ -30,6 +32,7 @@ builder.Services.AddKeyedScoped<IItemsRepository, ItemsInMemoryRepository>("cach
 builder.Services.AddKeyedScoped<IItemsRepository, ItemsDbRepository>("db");
 
 builder.Services.AddScoped<ImportItemFactory>();
+builder.Services.AddScoped<ApproveValidationFilter>();
 
 
 var app = builder.Build();
@@ -51,7 +54,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseSession();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

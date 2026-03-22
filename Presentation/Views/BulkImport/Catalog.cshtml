@@ -1,47 +1,264 @@
 ﻿@model List<Common.Interfaces.IItemValidating>
 
-<h2>Catalog</h2>
+@using Common.Models
 
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-info">@TempData["Message"]</div>
+@{
+    ViewData["Title"] = "Catalog";
+
+    var mode = ViewBag.Mode as string ?? "bulkimport";
+    var pageTitle = ViewBag.PageTitle as string ?? "Catalog";
+
+    var pendingRestaurants = ViewBag.PendingRestaurants as List<Restaurant> ?? new List<Restaurant>();
+    var pendingMenuItems = ViewBag.PendingMenuItems as List<MenuItem> ?? new List<MenuItem>();
+    var approvedRestaurants = ViewBag.ApprovedRestaurants as List<Restaurant> ?? new List<Restaurant>();
+
+    var restaurantsFromModel = Model?.OfType<Restaurant>().ToList() ?? new List<Restaurant>();
+    var menuItemsFromModel = Model?.OfType<MenuItem>().ToList() ?? new List<MenuItem>();
 }
 
-<!-- Upload -->
-<form asp-controller="BulkImport" asp-action="BulkImport" method="post" enctype="multipart/form-data" class="mb-3">
-    <input class="form-control" type="file" name="file" accept=".json" />
-    <button class="btn btn-primary mt-2" type="submit">Upload JSON</button>
-</form>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h2 class="mb-0">@pageTitle</h2>
 
-@if (Model != null && Model.Count > 0)
-{
-    <form asp-controller="BulkImport" asp-action="Approve" method="post">
-        <button class="btn btn-success mb-2" type="submit">Approve selected (Preview)</button>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-controller="BulkImport" asp-action="Index" class="btn btn-outline-secondary btn-sm">Bulk Import</a>
+            <a asp-controller="BulkImport" asp-action="Verification" class="btn btn-outline-warning btn-sm">Verification</a>
+            <a asp-controller="Items" asp-action="Catalog" class="btn btn-outline-primary btn-sm">Public Catalog</a>
 
-        @foreach (var item in Model)
-        {
-            <div class="border p-2 mb-2">
-                @if (item is Common.Models.Restaurant r)
-                {
-                    <input type="checkbox" name="itemIds" value="@r.Id" />
-                }
-                else if (item is Common.Models.MenuItem m)
-                {
-                    <input type="checkbox" name="itemIds" value="@m.Id" />
-                }
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <span class="btn btn-light btn-sm disabled">Hello @User.Identity.Name</span>
 
-                <div class="mt-2">
-                    @await Html.PartialAsync(item.GetCardPartial(), item)
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "BulkImport")" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+                </form>
+            }
+            else
+            {
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-success btn-sm">Login</a>
+                <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-info btn-sm">Register</a>
+            }
+        </div>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-info shadow-sm">
+            @TempData["Message"]
+        </div>
+    }
+
+    @* bulk import view *@
+    @if (mode == "bulkimport")
+    {
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">1. Upload JSON</h4>
+                        <form asp-controller="BulkImport" asp-action="BulkImport" method="post" enctype="multipart/form-data">
+                            <input type="file" name="file" accept=".json" class="form-control mb-3" />
+                            <button type="submit" class="btn btn-primary w-100">Upload JSON</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 mt-3">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">2. Download ZIP Template</h4>
+                        <form asp-controller="BulkImport" asp-action="DownloadZip" method="post">
+                            <button type="submit" class="btn btn-secondary w-100">Download ZIP</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 mt-3">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">3. Upload ZIP and Commit</h4>
+                        <form asp-controller="BulkImport" asp-action="Commit" method="post" enctype="multipart/form-data">
+                            <input type="file" name="zipFile" accept=".zip" class="form-control mb-3" />
+                            <button type="submit" class="btn btn-success w-100">Upload ZIP and Commit</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        }
-    </form>
 
-    <form asp-controller="BulkImport" asp-action="Commit" method="post" class="mt-3">
-        <button class="btn btn-warning" type="submit">Commit to DB</button>
-    </form>
-}
-else
-{
-    <div class="text-muted">No items yet. Upload a JSON file.</div>
-}
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h4 class="mb-3">Preview from Cache</h4>
+
+                        @if (Model != null && Model.Any())
+                        {
+                            <div class="row g-3">
+                                @foreach (var item in Model)
+                                {
+                                    <div class="col-md-6">
+                                        <div class="card h-100 border">
+                                            <div class="card-body">
+                                                <partial name="@item.GetCardPartial()" model="item" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">No cached items yet. Upload a JSON file first.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* verification view *@
+    else if (mode == "verification")
+    {
+        var verificationType = ViewBag.VerificationType as string ?? "";
+
+        @if (verificationType == "owner-restaurants")
+        {
+            @if (restaurantsFromModel.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var restaurant in restaurantsFromModel)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-body">
+                                    <partial name="@restaurant.GetCardPartial()" model="restaurant" />
+
+                                    <div class="mt-3">
+                                        <a asp-controller="BulkImport"
+                                           asp-action="Verification"
+                                           asp-route-restId="@restaurant.Id"
+                                           class="btn btn-warning btn-sm">
+                                            View Pending Menu Items
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">You do not own any restaurants.</p>
+            }
+        }
+        else
+        {
+            @if (restaurantsFromModel.Any() || menuItemsFromModel.Any())
+            {
+                <form asp-controller="BulkImport" asp-action="Approve" method="post">
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-success">Approve Selected</button>
+                    </div>
+
+                    @if (restaurantsFromModel.Any())
+                    {
+                        <div class="row g-3">
+                            @foreach (var restaurant in restaurantsFromModel)
+                            {
+                                <div class="col-md-6">
+                                    <div class="card h-100 border">
+                                        <div class="card-body">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" name="itemIds" value="@restaurant.Id" id="rest_@restaurant.Id" />
+                                                <label class="form-check-label" for="rest_@restaurant.Id">Select</label>
+                                            </div>
+
+                                            <partial name="@restaurant.GetCardPartial()" model="restaurant" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (menuItemsFromModel.Any())
+                    {
+                        <div class="mt-3">
+                            @foreach (var menuItem in menuItemsFromModel)
+                            {
+                                <div class="border rounded p-2 mb-2">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="itemIds" value="@menuItem.Id" id="menu_@menuItem.Id" />
+                                        <label class="form-check-label" for="menu_@menuItem.Id">Select</label>
+                                    </div>
+
+                                    <partial name="@menuItem.GetCardPartial()" model="menuItem" />
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success">Approve Selected</button>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <p class="text-muted mb-0">No pending items found.</p>
+            }
+        }
+    }
+
+    @* public catalog view *@
+    else if (mode == "public")
+    {
+        @if (Context.Request.Query["restId"].Count > 0)
+        {
+            <div class="mb-3">
+                <a asp-controller="Items"
+                   asp-action="Catalog"
+                   class="btn btn-outline-secondary btn-sm">
+                    ← Back to Restaurants
+                </a>
+            </div>
+        }
+
+        @if (restaurantsFromModel.Any())
+        {
+            <div class="row g-3">
+                @foreach (var restaurant in restaurantsFromModel)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body">
+                                <partial name="@restaurant.GetCardPartial()" model="restaurant" />
+
+                                <div class="mt-3">
+                                    <a asp-controller="Items"
+                                       asp-action="Catalog"
+                                       asp-route-restId="@restaurant.Id"
+                                       class="btn btn-primary btn-sm">
+                                        View Menu Items
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else if (menuItemsFromModel.Any())
+        {
+            <div class="mt-3">
+                @foreach (var menuItem in menuItemsFromModel)
+                {
+                    <partial name="@menuItem.GetCardPartial()" model="menuItem" />
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No items found.</p>
+        }
+    }
+</div>

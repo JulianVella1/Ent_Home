@@ -40,7 +40,8 @@ namespace DataAccess.Factory
             {
                 Name = item.GetProperty("name").GetString() ?? "",
                 OwnerEmail = item.GetProperty("ownerEmailAddress").GetString() ?? "",
-                
+                ExternalId = item.GetProperty("id").GetString() ?? "",
+                Status = false // Technicly set as default from the DB but better safe than sorry
             };
         }
 
@@ -51,7 +52,9 @@ namespace DataAccess.Factory
                 Id = Guid.NewGuid(),
                 Title = item.GetProperty("title").GetString() ?? "",
                 Price = item.GetProperty("price").GetDecimal(),
-                RestId = item.GetProperty("restaurantId").GetInt32(),
+                ExternalId = item.GetProperty("id").GetString() ?? "",
+                RestaurantExternalId = item.GetProperty("restaurantId").GetString() ?? "",
+                Status = false
             };
         }
     }

@@ -4,5 +4,9 @@
 <div class="card p-3">
     <h5 class="mb-1">@Model.Name</h5>
     <div>Owner: @Model.OwnerEmail</div>
+    @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+    {
+        <img src="@Model.ImagePath" style="max-width:200px;" />
+    }
     <div>Status: @(Model.Status ? "Approved" : "Pending")</div>
 </div>

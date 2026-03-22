@@ -13,9 +13,10 @@ namespace Presentation.Controllers
             _logger = logger;
         }
 
+        
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Index", "BulkImport");
         }
 
         public IActionResult Privacy()
